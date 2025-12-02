@@ -1,0 +1,5 @@
+{
+  "name": "HCC Risk Interpreter V2",
+  "description": "An AI-powered tool for doctors and nurses to interpret Hierarchical Condition Category (HCC) risk adjustment reports into actionable clinical insights.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,145 @@
+<div class="min-h-screen flex flex-col">
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-slate-800 tracking-tight">HCC Risk <span class="text-blue-600">Interpreter</span></h1>
+      </div>
+      <div class="text-sm text-slate-500 hidden sm:block">
+        Medical Provider Intelligence Tool
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      @if (analysisResult()) {
+        <!-- RESULTS VIEW -->
+        <app-report-viewer 
+          [result]="analysisResult()!" 
+          (onReset)="reset()">
+        </app-report-viewer>
+
+      } @else {
+        <!-- INPUT VIEW -->
+        <div class="max-w-3xl mx-auto animate-fade-in">
+          
+          <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-4">Make Sense of Risk Adjustment Data</h2>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+              Paste your raw HCC/RAF report below. Our AI identifies patient demographics, key conditions, and highlights documentation gaps.
+            </p>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+            <form [formGroup]="inputForm" (ngSubmit)="onSubmit()" class="p-6 sm:p-8">
+              
+              <!-- Report Text Section -->
+              <div class="mb-6">
+                <label for="reportText" class="block text-sm font-semibold text-slate-700 mb-2">
+                  Risk Adjustment / HCC Report Text
+                </label>
+                <div class="relative">
+                  <textarea 
+                    id="reportText"
+                    formControlName="reportText"
+                    rows="10"
+                    [placeholder]="placeholderText"
+                    class="block w-full rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 font-mono text-sm p-4 transition duration-150 ease-in-out"
+                    [class.border-red-300]="inputForm.get('reportText')?.invalid && inputForm.get('reportText')?.touched"
+                  ></textarea>
+                  <!-- Corner accent -->
+                  <div class="absolute top-0 right-0 p-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                </div>
+                @if (inputForm.get('reportText')?.invalid && inputForm.get('reportText')?.touched) {
+                  <p class="mt-2 text-sm text-red-600">Please paste a report (min 10 characters).</p>
+                }
+              </div>
+
+              <!-- Financial Text Section -->
+              <div class="mb-6">
+                <label for="financialText" class="block text-sm font-semibold text-slate-700 mb-2">
+                  RAF Score & Monthly Payments (Optional)
+                </label>
+                <div class="relative">
+                  <textarea 
+                    id="financialText"
+                    formControlName="financialText"
+                    rows="4"
+                    [placeholder]="financialPlaceholder"
+                    class="block w-full rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-slate-900 font-mono text-sm p-4 transition duration-150 ease-in-out"
+                  ></textarea>
+                  <div class="absolute top-0 right-0 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-slate-400">Add payment details here to include them in the analysis.</p>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <button 
+                  type="submit" 
+                  [disabled]="inputForm.invalid || isLoading()"
+                  class="w-full sm:w-auto flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  @if (isLoading()) {
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyzing...
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Interpret Report
+                  }
+                </button>
+                
+                <button 
+                  type="button" 
+                  (click)="reset()" 
+                  class="w-full sm:w-auto text-slate-500 font-medium py-3 px-6 hover:text-slate-700 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+
+              @if (error()) {
+                <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-red-700 text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{{ error() }}</span>
+                </div>
+              }
+
+            </form>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Secure Processing
+              </span>
+              <span>Gemini 3 Pro Preview</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
